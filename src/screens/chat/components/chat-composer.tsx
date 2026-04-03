@@ -124,7 +124,8 @@ type ModelSwitchNotice = {
   retryProvider?: string
 }
 
-const HERMES_API_URL = process.env.HERMES_API_URL || 'http://127.0.0.1:8642'
+// Use proxy path to avoid CORS — /api/hermes-proxy/* strips prefix and forwards to gateway
+const HERMES_API_URL = '/api/hermes-proxy'
 
 function readModelText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : ''

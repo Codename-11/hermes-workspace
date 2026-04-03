@@ -8,8 +8,11 @@
  *   - Enhanced: Hermes-native extras (sessions, skills, memory, config, jobs)
  */
 
+// Server-side: use direct gateway URL. Client-side: use Vite proxy to avoid CORS.
 export let HERMES_API =
-  process.env.HERMES_API_URL || 'http://127.0.0.1:8642'
+  typeof window !== 'undefined'
+    ? '/api/hermes-proxy'
+    : (process.env.HERMES_API_URL || 'http://127.0.0.1:8642')
 
 export const HERMES_UPGRADE_INSTRUCTIONS =
   'Update Hermes: cd hermes-agent && git pull && pip install -e . && hermes --gateway'

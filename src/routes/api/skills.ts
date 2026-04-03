@@ -204,8 +204,14 @@ async function fetchHermesSkills(): Promise<Array<SkillSummary>> {
         ? (asRecord(payload).skills as Array<unknown>)
         : []
 
+  // Gateway /api/skills only returns installed skills (no marketplace distinction),
+  // so mark them all as installed to pass the 'installed' tab filter.
   return items
-    .map((entry) => normalizeSkill(entry))
+    .map((entry) => {
+      const record = asRecord(entry)
+      record.installed = true
+      return normalizeSkill(record)
+    })
     .filter((entry): entry is SkillSummary => entry !== null)
 }
 

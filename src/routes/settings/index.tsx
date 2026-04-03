@@ -875,7 +875,8 @@ type HermesConfigData = {
   hermesHome: string
 }
 
-const HERMES_API = process.env.HERMES_API_URL || 'http://127.0.0.1:8642'
+// Proxied through workspace to avoid CORS
+const HERMES_API = '/api/hermes-proxy'
 
 type AvailableModelsResponse = {
   provider: string
