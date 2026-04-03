@@ -86,6 +86,10 @@ export function getSessionTokenFromCookie(
 }
 
 function isLocalRequest(request: Request): boolean {
+  // If behind a trusted reverse proxy (Authelia/Traefik), trust it
+  const remoteUser = request.headers.get('remote-user')
+  if (remoteUser) return true  // Authelia already authenticated
+
   const forwarded = request.headers.get('x-forwarded-for')
   const ip = forwarded?.split(',')[0]?.trim() || '127.0.0.1'
   const localIPs = ['127.0.0.1', '::1', 'localhost', '::ffff:127.0.0.1']
@@ -94,6 +98,8 @@ function isLocalRequest(request: Request): boolean {
   if (/^100\.\d+\.\d+\.\d+$/.test(ip)) return true
   if (/^192\.168\./.test(ip)) return true
   if (/^10\./.test(ip)) return true
+  // Allow Docker bridge networks (172.16-31.x.x)
+  if (/^172\.(1[6-9]|2\d|3[01])\./.test(ip)) return true
   return false
 }
 
