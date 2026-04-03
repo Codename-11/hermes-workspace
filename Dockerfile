@@ -16,16 +16,17 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup -S hermes && adduser -S hermes -G hermes
+# Python needed for PTY terminal sessions (pty-helper.py)
+RUN apk add --no-cache python3
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/server-entry.js ./
+# PTY helper for terminal sessions (not included in Vite build output)
+COPY --from=builder /app/src/server/pty-helper.py ./dist/server/
 
 EXPOSE 3000
-
-USER hermes
 
 CMD ["node", "server-entry.js"]
 
