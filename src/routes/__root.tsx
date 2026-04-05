@@ -232,7 +232,7 @@ function RootLayout() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" data-theme={DEFAULT_THEME} style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
         <meta httpEquiv="Content-Security-Policy" content={APP_CSP} />
         <script dangerouslySetInnerHTML={{ __html: `
