@@ -17,7 +17,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Python needed for PTY terminal sessions (pty-helper.py)
-RUN apk add --no-cache python3
+# bash needed because pty-helper.py defaults to /bin/bash
+RUN apk add --no-cache python3 bash
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import {
   AreaChart,
@@ -147,6 +147,10 @@ function MetricTile({ label, value, sub, icon, accentColor }: {
 // ── Activity Chart ───────────────────────────────────────────────
 
 function ActivityChart({ sessions }: { sessions: HermesSession[] }) {
+  // Defer chart rendering to client to avoid Recharts measuring -1 dimensions during SSR
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
   const chartData = useMemo(() => {
     const dayMap = new Map<string, { sessions: number; messages: number }>()
     const now = Date.now() / 1000
@@ -171,7 +175,7 @@ function ActivityChart({ sessions }: { sessions: HermesSession[] }) {
   return (
     <GlassCard title="Activity" titleRight={<span className="text-[10px] text-muted">14 days</span>} accentColor="#6366f1" className="h-full">
       <div className="h-[200px] w-full -ml-2">
-        <ResponsiveContainer width="100%" height="100%">
+        {mounted ? <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
             <defs>
               <linearGradient id="g-sessions" x1="0" y1="0" x2="0" y2="1">
@@ -190,7 +194,7 @@ function ActivityChart({ sessions }: { sessions: HermesSession[] }) {
             <Area type="monotone" dataKey="messages" stroke="#22c55e" fill="url(#g-messages)" strokeWidth={1.5} dot={false} />
             <Area type="monotone" dataKey="sessions" stroke="#6366f1" fill="url(#g-sessions)" strokeWidth={2} dot={false} />
           </AreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer> : <div className="flex items-center justify-center h-full text-xs text-muted">Loading chart…</div>}
       </div>
       <div className="flex items-center gap-5 mt-2 text-[10px] text-neutral-500">
         <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#6366f1]" />Sessions</span>
@@ -210,7 +214,11 @@ function ModelCard() {
     staleTime: 30_000,
     enabled: configAvailable,
   })
-  const caps = getCapabilities()
+  // Use state + useEffect to avoid hydration mismatch (server has probed caps, client starts fresh)
+  const [caps, setCaps] = useState<ReturnType<typeof getCapabilities> | null>(null)
+  useEffect(() => {
+    setCaps(getCapabilities())
+  }, [])
   const config = configQuery.data as Record<string, unknown> | undefined
   const modelBlock = config?.model as Record<string, unknown> | undefined
   const modelName = (modelBlock?.default ?? config?.model ?? '—') as string
@@ -387,7 +395,8 @@ export function DashboardScreen() {
   })
 
   const sessions = (sessionsQuery.data ?? []) as HermesSession[]
-  const caps = getCapabilities()
+  // NOTE: removed bare getCapabilities() call here - it caused hydration mismatch
+  // (server had probed caps, client started fresh with all false)
 
   const stats = useMemo(() => {
     let totalMessages = 0, totalToolCalls = 0, totalTokens = 0
