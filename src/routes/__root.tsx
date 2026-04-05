@@ -250,84 +250,89 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeColorScript }} />
       </head>
       <body>
+        {/* Splash screen rendered in SSR to avoid React hydration mismatch (#418).
+            The script below updates colors for non-default themes via localStorage. */}
+        <div id="splash-screen" suppressHydrationWarning style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: '#0A0E1A', transition: 'opacity 0.5s ease',
+        }}>
+          <img src="/hermes-avatar.webp" alt="Hermes" style={{
+            width: 80, height: 80, marginBottom: 20, borderRadius: 16,
+            filter: 'drop-shadow(0 8px 32px color-mix(in srgb, #6366F1 45%, transparent))',
+          }} />
+          <img src="/hermes-banner.png" alt="Hermes Workspace" id="splash-banner" style={{
+            width: 280, height: 'auto', marginBottom: 8,
+            filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.5))',
+          }} />
+          <div id="splash-subtitle" style={{
+            font: '400 14px/1 system-ui,-apple-system,sans-serif',
+            letterSpacing: '0.04em', color: '#9AA5BD',
+          }}>Workspace</div>
+          <div id="splash-track" style={{
+            marginTop: 28, width: 140, height: 3,
+            background: 'rgba(255,255,255,0.08)', borderRadius: 3,
+            overflow: 'hidden', position: 'relative',
+          }}>
+            <div id="splash-bar" style={{
+              width: '0%', height: '100%', background: '#6366F1',
+              borderRadius: 3, transition: 'width 0.4s ease',
+            }} />
+          </div>
+        </div>
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
-            if (document.getElementById('splash-screen')) return;
-            var bg = '#0A0E1A', txt = '#E6EAF2', muted = '#9AA5BD', accent = '#6366F1';
+            var bg = '#0A0E1A', muted = '#9AA5BD', accent = '#6366F1', isDark = true;
             try {
               var theme = localStorage.getItem('${THEME_STORAGE_KEY}') || '${DEFAULT_THEME}';
-              if (theme === 'hermes-classic') {
-                bg = '#0d0f12';
-                txt = '#eceff4';
-                muted = '#7f8a96';
-                accent = '#b98a44';
-              } else if (theme === 'hermes-official-light') {
-                bg = '#F6F8FC';
-                txt = '#111827';
-                muted = '#4B5563';
-                accent = '#4F46E5';
-              } else if (theme === 'hermes-classic-light') {
-                bg = '#F5F2ED';
-                txt = '#1a1f26';
-                muted = '#6F675E';
-                accent = '#b98a44';
-              } else if (theme === 'hermes-slate') {
-                bg = '#0d1117';
-                txt = '#c9d1d9';
-                muted = '#8b949e';
-                accent = '#7eb8f6';
-              } else if (theme === 'hermes-slate-light') {
-                bg = '#F6F8FA';
-                txt = '#24292f';
-                muted = '#57606A';
-                accent = '#3b82f6';
-              } else if (theme === 'hermes-mono') {
-                bg = '#111111';
-                txt = '#e6edf3';
-                muted = '#888888';
-                accent = '#aaaaaa';
-              } else if (theme === 'hermes-mono-light') {
-                bg = '#FAFAFA';
-                txt = '#1a1a1a';
-                muted = '#666666';
-                accent = '#666666';
-              }
+              var colors = {
+                'hermes-classic':       { bg:'#0d0f12', muted:'#7f8a96', accent:'#b98a44' },
+                'hermes-official-light': { bg:'#F6F8FC', muted:'#4B5563', accent:'#4F46E5' },
+                'hermes-classic-light':  { bg:'#F5F2ED', muted:'#6F675E', accent:'#b98a44' },
+                'hermes-slate':          { bg:'#0d1117', muted:'#8b949e', accent:'#7eb8f6' },
+                'hermes-slate-light':    { bg:'#F6F8FA', muted:'#57606A', accent:'#3b82f6' },
+                'hermes-mono':           { bg:'#111111', muted:'#888888', accent:'#aaaaaa' },
+                'hermes-mono-light':     { bg:'#FAFAFA', muted:'#666666', accent:'#666666' },
+              };
+              if (colors[theme]) { bg = colors[theme].bg; muted = colors[theme].muted; accent = colors[theme].accent; }
+              isDark = !['hermes-official-light','hermes-classic-light','hermes-slate-light','hermes-mono-light'].includes(theme);
             } catch(e){}
 
-            var isDark = !['hermes-official-light','hermes-classic-light','hermes-slate-light','hermes-mono-light'].includes(theme);
-            var quips = ["Consulting the oracle...","Loading ancient knowledge...","Warming up the messenger...","Calibrating tool chain...","Summoning Hermes...","Preparing the workspace...","Bridging realms...","Initializing agent runtime..."];
-            var quip = quips[Math.floor(Math.random() * quips.length)];
-
-            var d = document.createElement('div');
-            d.id = 'splash-screen';
-            d.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:'+bg+';transition:opacity 0.5s ease;';
-            d.innerHTML = '<img src="/hermes-avatar.webp" alt="Hermes" style="width:80px;height:80px;margin-bottom:20px;border-radius:16px;filter:drop-shadow(0 8px 32px color-mix(in srgb,'+accent+' 45%, transparent))" />'
-              + '<img src="'+(isDark ? '/hermes-banner.png' : '/hermes-banner-light.png')+'" alt="Hermes Workspace" style="width:280px;height:auto;margin-bottom:8px;filter:drop-shadow(0 4px 16px '+(isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)')+')" />'
-              + '<div style="font:400 14px/1 system-ui,-apple-system,sans-serif;letter-spacing:0.04em;color:'+muted+'">Workspace</div>'
-              + '<div style="margin-top:28px;width:140px;height:3px;background:'+(isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')+';border-radius:3px;overflow:hidden;position:relative"><div id=splash-bar style="width:0%;height:100%;background:'+accent+';border-radius:3px;transition:width 0.4s ease"></div></div>';
-            document.body.prepend(d);
-
-            var bar = document.getElementById('splash-bar');
-            if (bar) {
-              setTimeout(function(){ bar.style.width='15%' }, 300);
-              setTimeout(function(){ bar.style.width='40%' }, 800);
-              setTimeout(function(){ bar.style.width='65%' }, 1500);
-              setTimeout(function(){ bar.style.width='85%' }, 2500);
-              setTimeout(function(){ bar.style.width='92%' }, 3200);
+            // Update splash screen colors for non-default themes
+            var el = document.getElementById('splash-screen');
+            if (el) {
+              el.style.background = bg;
+              var banner = document.getElementById('splash-banner');
+              if (banner) {
+                banner.src = isDark ? '/hermes-banner.png' : '/hermes-banner-light.png';
+                banner.style.filter = 'drop-shadow(0 4px 16px ' + (isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)') + ')';
+              }
+              var sub = document.getElementById('splash-subtitle');
+              if (sub) sub.style.color = muted;
+              var track = document.getElementById('splash-track');
+              if (track) track.style.background = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+              var bar = document.getElementById('splash-bar');
+              if (bar) {
+                bar.style.background = accent;
+                setTimeout(function(){ bar.style.width='15%' }, 300);
+                setTimeout(function(){ bar.style.width='40%' }, 800);
+                setTimeout(function(){ bar.style.width='65%' }, 1500);
+                setTimeout(function(){ bar.style.width='85%' }, 2500);
+                setTimeout(function(){ bar.style.width='92%' }, 3200);
+              }
             }
 
             window.__dismissSplash = function() {
-              var el = document.getElementById('splash-screen');
-              if (!el) return;
-              if (bar) bar.style.width = '100%';
+              var s = document.getElementById('splash-screen');
+              if (!s) return;
+              var b = document.getElementById('splash-bar');
+              if (b) b.style.width = '100%';
               setTimeout(function(){
-                el.style.opacity = '0';
-                setTimeout(function(){ el.remove(); }, 500);
+                s.style.opacity = '0';
+                setTimeout(function(){ s.remove(); }, 500);
               }, 300);
             };
-            // Fallback: always dismiss after 5s
             setTimeout(function(){ window.__dismissSplash && window.__dismissSplash(); }, 5000);
-            // Fast dismiss: returning users skip quickly
             try {
               if (localStorage.getItem('hermes-hermes-url') || localStorage.getItem('hermes-url')) {
                 setTimeout(function(){ window.__dismissSplash && window.__dismissSplash(); }, 600);
