@@ -261,20 +261,20 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             width: 80, height: 80, marginBottom: 20, borderRadius: 16,
             filter: 'drop-shadow(0 8px 32px color-mix(in srgb, #6366F1 45%, transparent))',
           }} />
-          <img src="/hermes-banner.png" alt="Hermes Workspace" id="splash-banner" style={{
+          <img src="/hermes-banner.png" alt="Hermes Workspace" id="splash-banner" suppressHydrationWarning style={{
             width: 280, height: 'auto', marginBottom: 8,
             filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.5))',
           }} />
-          <div id="splash-subtitle" style={{
+          <div id="splash-subtitle" suppressHydrationWarning style={{
             font: '400 14px/1 system-ui,-apple-system,sans-serif',
             letterSpacing: '0.04em', color: '#9AA5BD',
           }}>Workspace</div>
-          <div id="splash-track" style={{
+          <div id="splash-track" suppressHydrationWarning style={{
             marginTop: 28, width: 140, height: 3,
             background: 'rgba(255,255,255,0.08)', borderRadius: 3,
             overflow: 'hidden', position: 'relative',
           }}>
-            <div id="splash-bar" style={{
+            <div id="splash-bar" suppressHydrationWarning style={{
               width: '0%', height: '100%', background: '#6366F1',
               borderRadius: 3, transition: 'width 0.4s ease',
             }} />
