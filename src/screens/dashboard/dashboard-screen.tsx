@@ -13,7 +13,7 @@ import {
 } from 'recharts'
 import { listSessions, getConfig } from '@/server/hermes-api'
 import { chatQueryKeys } from '@/screens/chat/chat-queries'
-import { getCapabilities } from '@/server/gateway-capabilities'
+// getCapabilities removed — use useFeatureAvailable hook instead (server-side probe via /api/gateway-status)
 import type { HermesSession } from '@/server/hermes-api'
 import { getUnavailableReason } from '@/lib/feature-gates'
 import { useFeatureAvailable } from '@/hooks/use-feature-available'
@@ -214,17 +214,13 @@ function ModelCard() {
     staleTime: 30_000,
     enabled: configAvailable,
   })
-  // Use state + useEffect to avoid hydration mismatch (server has probed caps, client starts fresh)
-  const [caps, setCaps] = useState<ReturnType<typeof getCapabilities> | null>(null)
-  useEffect(() => {
-    setCaps(getCapabilities())
-  }, [])
+  const sessionsAvailableForModel = useFeatureAvailable('sessions')
   const config = configQuery.data as Record<string, unknown> | undefined
   const modelBlock = config?.model as Record<string, unknown> | undefined
   const modelName = (modelBlock?.default ?? config?.model ?? '—') as string
   const provider = (modelBlock?.provider ?? config?.provider ?? '—') as string
   const baseUrl = (modelBlock?.base_url ?? config?.base_url ?? '') as string
-  const connected = caps?.sessions === true
+  const connected = sessionsAvailableForModel
   const fallbackBlock = config?.fallback_model as Record<string, unknown> | undefined
   const fallbackModel = fallbackBlock?.model as string | undefined
 
