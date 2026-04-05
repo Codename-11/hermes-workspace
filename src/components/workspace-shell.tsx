@@ -105,13 +105,15 @@ export function WorkspaceShell() {
     return -1
   }, [])
 
-  // Start with checked=false on both server and client to avoid hydration mismatch.
-  // The ConnectionStartupScreen overlay verifies the real status on mount.
+  const isClient = typeof window !== 'undefined'
+  // SSR renders workspace directly (checked=true); client shows ConnectionStartupScreen
+  // briefly while verifying the gateway connection. This causes a React #418 hydration
+  // warning which is expected — React recovers by re-rendering the client tree.
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null)
   const [connectionVerified, setConnectionVerified] = useState(false)
 
   const authState = {
-    checked: connectionVerified,
+    checked: !isClient || connectionVerified,
     authenticated: authStatus?.authenticated ?? true,
     authRequired: authStatus?.authRequired ?? false,
   }
