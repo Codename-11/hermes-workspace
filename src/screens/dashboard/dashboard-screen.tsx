@@ -346,7 +346,7 @@ function QuickAction({ label, icon, onClick, accentColor, disabled, badge }: {
 function SessionRow({ session, maxTokens, onClick }: {
   session: HermesSession; maxTokens: number; onClick: () => void
 }) {
-  const tokens = (session.input_tokens ?? 0) + (session.output_tokens ?? 0)
+  const tokens = (session as any).totalTokens ?? ((session.input_tokens ?? 0) + (session.output_tokens ?? 0))
   const msgs = session.message_count ?? 0
   const tools = session.tool_call_count ?? 0
   const barWidth = maxTokens > 0 ? Math.max(1, (tokens / maxTokens) * 100) : 0
@@ -399,7 +399,7 @@ export function DashboardScreen() {
     for (const s of sessions) {
       totalMessages += s.message_count ?? 0
       totalToolCalls += s.tool_call_count ?? 0
-      totalTokens += (s.input_tokens ?? 0) + (s.output_tokens ?? 0)
+      totalTokens += (s as any).totalTokens ?? ((s.input_tokens ?? 0) + (s.output_tokens ?? 0))
     }
     return { totalSessions: sessions.length, totalMessages, totalToolCalls, totalTokens }
   }, [sessions])
@@ -410,7 +410,7 @@ export function DashboardScreen() {
 
   const maxTokens = useMemo(() => {
     let max = 0
-    for (const s of recentSessions) { const t = (s.input_tokens ?? 0) + (s.output_tokens ?? 0); if (t > max) max = t }
+    for (const s of recentSessions) { const t = (s as any).totalTokens ?? ((s.input_tokens ?? 0) + (s.output_tokens ?? 0)); if (t > max) max = t }
     return max
   }, [recentSessions])
 
