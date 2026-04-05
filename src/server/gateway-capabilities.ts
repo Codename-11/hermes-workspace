@@ -298,4 +298,6 @@ export function isHermesConnected(): boolean {
   return capabilities.health
 }
 
-void ensureGatewayProbed()
+if (typeof window === 'undefined') {
+  void ensureGatewayProbed()
+}

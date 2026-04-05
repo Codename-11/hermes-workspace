@@ -17,7 +17,9 @@ import {
 const _authHeaders = (): Record<string, string> =>
   BEARER_TOKEN ? { Authorization: `Bearer ${BEARER_TOKEN}` } : {}
 
-console.log(`[hermes-api] Configured API: ${HERMES_API}`)
+if (typeof window === 'undefined') {
+  console.log(`[hermes-api] Configured API: ${HERMES_API}`)
+}
 
 // ── Types ─────────────────────────────────────────────────────────
 
