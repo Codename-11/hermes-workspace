@@ -40,6 +40,7 @@ type SkillSummary = {
 }
 
 const HERMES_API_URL = process.env.HERMES_API_URL || 'http://127.0.0.1:8642'
+const HERMES_API_TOKEN = process.env.HERMES_API_TOKEN || ''
 
 const KNOWN_CATEGORIES = [
   'All',
@@ -189,7 +190,9 @@ function normalizeSkill(value: unknown): SkillSummary | null {
 }
 
 async function fetchHermesSkills(): Promise<Array<SkillSummary>> {
-  const response = await fetch(`${HERMES_API_URL}/api/skills`)
+  const response = await fetch(`${HERMES_API_URL}/api/skills`, {
+    headers: HERMES_API_TOKEN ? { Authorization: `Bearer ${HERMES_API_TOKEN}` } : {},
+  })
   if (!response.ok) {
     const body = await response.text().catch(() => '')
     throw new Error(body || `Hermes skills request failed (${response.status})`)

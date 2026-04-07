@@ -10,6 +10,7 @@ import {
 } from '../../server/hermes-api'
 
 const HERMES_API_URL = process.env.HERMES_API_URL || 'http://127.0.0.1:8642'
+const HERMES_API_TOKEN = process.env.HERMES_API_TOKEN || ''
 
 // Well-known models for providers available via auth store
 const AUTH_STORE_MODELS: Record<string, Array<ModelEntry>> = {
@@ -86,7 +87,9 @@ function normalizeHermesModel(entry: unknown): ModelEntry | null {
 }
 
 async function fetchHermesModels(): Promise<Array<ModelEntry>> {
-  const response = await fetch(`${HERMES_API_URL}/v1/models`)
+  const response = await fetch(`${HERMES_API_URL}/v1/models`, {
+    headers: HERMES_API_TOKEN ? { Authorization: `Bearer ${HERMES_API_TOKEN}` } : {},
+  })
   if (!response.ok) throw new Error(`Hermes models request failed (${response.status})`)
   const payload = asRecord(await response.json())
   const rawModels = Array.isArray(payload.data) ? payload.data : Array.isArray(payload.models) ? payload.models : []
